@@ -43,8 +43,8 @@ exports.create = async (req, res, next) => {
     // if (!req.body?.image) {
     //     return next(new ApiError(400, "Image can not be empty"));
     // } 
-    if (!req.body?.amount) {
-        return next(new ApiError(400, "Amount can not be empty"));
+    if (!req.body?.quality) {
+        return next(new ApiError(400, "Quality can not be empty"));
     } 
     if (!req.body?.description) {
         return next(new ApiError(400, "Description can not be empty"));

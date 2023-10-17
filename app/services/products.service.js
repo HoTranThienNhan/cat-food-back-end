@@ -12,7 +12,7 @@ class ProductsService {
             type: payload.type,
             price: payload.price,
             image: payload.image,
-            amount: payload.amount,
+            quality: payload.quality,
             description: payload.description,
         };
         // Remove undefined fields

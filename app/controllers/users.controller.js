@@ -17,6 +17,21 @@ exports.findOne = async (req, res, next) => {
     }
 };
 
+exports.findOneByEmail = async (req, res, next) => {
+    try {
+        const usersService = new UsersService(MongoDB.client);
+        const document = await usersService.findByEmail(req.params.id);
+        if (!document) {
+            return next(new ApiError(404, "Users not found"));
+        }
+        return res.send(document);
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error retrieving users with name=${req.params.id}`)
+        );
+    }
+};
+
 exports.create = async (req, res, next) => {
     if (!req.body?.name) {
         return next(new ApiError(400, "Name can not be empty"));
@@ -104,7 +119,6 @@ exports.signin = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error)
         return next(
             new ApiError(500, `Error signin user`)
         );
