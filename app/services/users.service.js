@@ -1,4 +1,5 @@
 const { ObjectId } = require('mongodb');
+const bcrypt = require('bcrypt');
 
 class UsersService {
     constructor(client) {
@@ -12,7 +13,8 @@ class UsersService {
             email: payload.email,
             address: payload.address,
             phone: payload.phone,
-            password: payload.password
+            password: payload.password,
+            createdAt: new Date(),
         };
         // Remove undefined fields
         Object.keys(users).forEach(
@@ -35,7 +37,15 @@ class UsersService {
 
     async create(payload) {
         const user = this.extractContactData(payload);
-        const result = await this.Users.insertOne(user);
+
+        // hash password with salt (cost = 10)
+        const costHash = 10;
+        const hashPassword = bcrypt.hashSync(user?.password, costHash);
+
+        const result = await this.Users.insertOne({
+            ...user,
+            password: hashPassword
+        });
         return result.value;
     }
 

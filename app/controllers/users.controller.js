@@ -1,6 +1,7 @@
 const ApiError = require("../api-error");
 const UsersService = require("../services/users.service");
 const MongoDB = require("../utils/mongodb.util");
+const bcrypt = require('bcrypt');
 
 exports.findOne = async (req, res, next) => {
     try {
@@ -35,13 +36,19 @@ exports.findOneByEmail = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     if (!req.body?.name) {
         return next(new ApiError(400, "Name can not be empty"));
-    } 
+    }
     if (!req.body?.email) {
         return next(new ApiError(400, "Email can not be empty"));
-    } 
+    }
+    if (!req.body?.phone) {
+        return next(new ApiError(400, "Phone can not be empty"));
+    }
+    if (!req.body?.address) {
+        return next(new ApiError(400, "Address can not be empty"));
+    }
     if (!req.body?.password) {
         return next(new ApiError(400, "Password can not be empty"));
-    } 
+    }
 
     // check existed user
     const usersService = new UsersService(MongoDB.client);
@@ -107,10 +114,12 @@ exports.signin = async (req, res, next) => {
 
         if (!document) {
             return next(new ApiError(404, "Email or password incorrect"));
-        }
-
-        if (password !== document.password) {
-            return next(new ApiError(404, "Email or password incorrect"));
+        } else {
+            // compare password and password in database
+            const comparePassword = bcrypt.compareSync(password, document?.password);
+            if (!comparePassword) {
+                return next(new ApiError(404, "Email or password incorrect"));
+            }
         }
 
         return res.send({

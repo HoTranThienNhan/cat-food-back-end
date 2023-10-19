@@ -1,18 +1,25 @@
 const { ObjectId } = require('mongodb');
 
-class CartsService {
+class OrdersService {
     constructor(client) {
-        this.Carts = client.db().collection("carts");
+        this.Orders = client.db().collection("orders");
     }
 
     // Define database extraction methods using mongodb API
     extractContactData(payload) {
-        const carts = {
+        const orders = {
             userId: payload.userId,
+            name: payload.name,
+            phone: payload.phone,
+            address: payload.address,
+            deliveryFee: payload.deliveryFee,
+            discount: payload.discount,
+            totalPrice: payload.totalPrice,
             products: [],
+            createdAt: new Date(),
         };
         payload.products.map((product) => {
-            carts.products.push({
+            orders.products.push({
                 name: product.name,
                 type: product.type,
                 price: product.price,
@@ -23,14 +30,14 @@ class CartsService {
         });
 
         // Remove undefined fields
-        Object.keys(carts).forEach(
-            (key) => carts[key] == undefined && delete carts[key]
+        Object.keys(orders).forEach(
+            (key) => orders[key] == undefined && delete orders[key]
         );
-        return carts;
+        return orders;
     }
 
     async findByUserId(userId) {
-        return await this.Carts.findOne({
+        return await this.Orders.findOne({
             userId: userId,
         });
     }
@@ -39,23 +46,11 @@ class CartsService {
         const filter = {
             userId: payload.userId,
         };
-        const cart = this.extractContactData(payload);
-        let result = null;
+        const order = this.extractContactData(payload);
 
-        // update cart if already existed
-        result = await this.Carts.findOneAndUpdate(
-            filter,
-            { $set: cart },
-            { returnDocument: "after" }
-        );
-
-        // create cart if not exist
-        // the user do not have cart (not have anything in cart)
-        if (!result) {
-            result = await this.Carts.insertOne(cart);
-        }
+        const result = await this.Orders.insertOne(order);
         return result;
     }
 }
 
-module.exports = CartsService;
+module.exports = OrdersService;

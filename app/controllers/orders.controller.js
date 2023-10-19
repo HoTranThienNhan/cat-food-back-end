@@ -1,18 +1,18 @@
 const ApiError = require("../api-error");
-const CartsService = require("../services/carts.service");
+const OrdersService = require("../services/orders.service");
 const MongoDB = require("../utils/mongodb.util");
 
 exports.findOne = async (req, res, next) => {
     try {
-        const cartsService = new CartsService(MongoDB.client);
-        const document = await cartsService.findByUserId(req.params.id);
+        const ordersService = new OrdersService(MongoDB.client);
+        const document = await ordersService.findByUserId(req.params.id);
         if (!document) {
-            return next(new ApiError(404, "Cart not found"));
+            return next(new ApiError(404, "Order not found"));
         }
         return res.send(document);
     } catch (error) {
         return next(
-            new ApiError(500, `Error retrieving cart with user id=${req.params.id}`)
+            new ApiError(500, `Error retrieving order with user id=${req.params.id}`)
         );
     }
 };
@@ -38,21 +38,21 @@ exports.add = async (req, res, next) => {
     // } 
 
     // check existed user
-    const cartsService = new CartsService(MongoDB.client);
+    const ordersService = new OrdersService(MongoDB.client);
 
     try {
-        const document = await cartsService.add(req.body);
+        const document = await ordersService.add(req.body);
         if (document) {
-            return res.send({ message: "Cart was added successfully" });
+            return res.send({ message: "Order was added successfully" });
         } else {
             return next(
-                new ApiError(404, "Cart not found")
+                new ApiError(404, "Order not found")
             );
         }
     } catch (error) {
         console.log(error);
         return next(
-            new ApiError(500, "An error occurred while creating the cart")
+            new ApiError(500, "An error occurred while creating the order")
         );
     }
 };
