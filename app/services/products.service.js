@@ -14,6 +14,7 @@ class ProductsService {
             image: payload.image,
             quality: payload.quality,
             description: payload.description,
+            sold: 0,
         };
         // Remove undefined fields
         Object.keys(products).forEach(

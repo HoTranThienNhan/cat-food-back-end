@@ -3,6 +3,7 @@ const { ObjectId } = require('mongodb');
 class OrdersService {
     constructor(client) {
         this.Orders = client.db().collection("orders");
+        this.Products = client.db().collection("products");
     }
 
     // Define database extraction methods using mongodb API
@@ -12,6 +13,7 @@ class OrdersService {
             name: payload.name,
             phone: payload.phone,
             address: payload.address,
+            method: payload.method,
             deliveryFee: payload.deliveryFee,
             discount: payload.discount,
             totalPrice: payload.totalPrice,
@@ -43,10 +45,25 @@ class OrdersService {
     }
 
     async add(payload) {
-        const filter = {
-            userId: payload.userId,
-        };
         const order = this.extractContactData(payload);
+        
+        // decrease product quality 
+        const promisesProduct = payload.products.map(async (product) => {
+            await this.Products.findOneAndUpdate(
+                {
+                    _id: ObjectId.isValid(product._id) ? new ObjectId(product._id) : null,
+                    quality: { $gte: product.amount },
+                },
+                {
+                    $inc: {
+                        quality: -product.amount,
+                        // sold: +product.amount,
+                    }
+                },
+                { new: true }
+            );
+        });
+        const resultsProduct = await Promise.all(promisesProduct);
 
         const result = await this.Orders.insertOne(order);
         return result;
