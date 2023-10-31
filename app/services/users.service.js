@@ -14,6 +14,7 @@ class UsersService {
             address: payload.address,
             phone: payload.phone,
             password: payload.password,
+            isAdmin: false,
             createdAt: new Date(),
         };
         // Remove undefined fields

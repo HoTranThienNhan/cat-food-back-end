@@ -46,6 +46,28 @@ class ProductsService {
         return result.value;
     }
 
+    async update(id, payload) {
+
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        };
+        const result = await this.Products.findOneAndUpdate(
+            filter,
+            { $set: 
+                { 
+                    "name": payload.name, 
+                    "type": payload.type,
+                    "price": payload.price,
+                    "quality": payload.quality,
+                    "description": payload.description,
+                    "image": payload.image,
+                } 
+            },
+            { returnDocument: "after" }
+        );
+        return result;
+    }
+
 }
 
 module.exports = ProductsService;

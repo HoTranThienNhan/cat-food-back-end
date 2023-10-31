@@ -2,7 +2,7 @@ const ApiError = require("../api-error");
 const OrdersService = require("../services/orders.service");
 const MongoDB = require("../utils/mongodb.util");
 
-exports.findOne = async (req, res, next) => {
+exports.find = async (req, res, next) => {
     try {
         const ordersService = new OrdersService(MongoDB.client);
         const document = await ordersService.findByUserId(req.params.id);
@@ -53,6 +53,22 @@ exports.add = async (req, res, next) => {
         console.log(error);
         return next(
             new ApiError(500, "An error occurred while creating the order")
+        );
+    }
+};
+
+exports.updateStatus = async (req, res, next) => {
+    try {
+        const ordersService = new OrdersService(MongoDB.client);
+        const document = await ordersService.updateStatus(req.params.id, req.params.status);
+        if (!document) {
+            return next(new ApiError(404, "Order not found"));
+        }
+        return res.send({ message: "Order status was updated successfully" });
+    } catch (error) {
+        console.log(error);
+        return next(
+            new ApiError(500, `Error updating order status with id=${req.params.id}`)
         );
     }
 };

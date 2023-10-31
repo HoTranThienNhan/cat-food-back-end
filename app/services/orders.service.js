@@ -18,6 +18,7 @@ class OrdersService {
             discount: payload.discount,
             totalPrice: payload.totalPrice,
             products: [],
+            status: payload.status,
             createdAt: new Date(),
         };
         payload.products.map((product) => {
@@ -39,14 +40,15 @@ class OrdersService {
     }
 
     async findByUserId(userId) {
-        return await this.Orders.findOne({
+        const cursor = await this.Orders.find({
             userId: userId,
         });
+        return await cursor.toArray();
     }
 
     async add(payload) {
         const order = this.extractContactData(payload);
-        
+
         // decrease product quality 
         const promisesProduct = payload.products.map(async (product) => {
             await this.Products.findOneAndUpdate(
@@ -68,6 +70,19 @@ class OrdersService {
         const result = await this.Orders.insertOne(order);
         return result;
     }
+
+    async updateStatus(id, status) {
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        };
+        const result = await this.Orders.findOneAndUpdate(
+            filter,
+            { $set: { "status": status } },
+            { returnDocument: "after" }
+        );
+        return result;
+    }
+
 }
 
 module.exports = OrdersService;

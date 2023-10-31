@@ -33,22 +33,22 @@ exports.findOne = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     if (!req.body?.name) {
         return next(new ApiError(400, "Name can not be empty"));
-    } 
+    }
     if (!req.body?.type) {
         return next(new ApiError(400, "Type can not be empty"));
-    } 
+    }
     if (!req.body?.price) {
         return next(new ApiError(400, "Price can not be empty"));
-    } 
-    // if (!req.body?.image) {
-    //     return next(new ApiError(400, "Image can not be empty"));
-    // } 
+    }
+    if (!req.body?.image) {
+        return next(new ApiError(400, "Image can not be empty"));
+    }
     if (!req.body?.quality) {
         return next(new ApiError(400, "Quality can not be empty"));
-    } 
+    }
     if (!req.body?.description) {
         return next(new ApiError(400, "Description can not be empty"));
-    } 
+    }
 
     // check existed user
     const productsService = new ProductsService(MongoDB.client);
@@ -59,6 +59,41 @@ exports.create = async (req, res, next) => {
     } catch (error) {
         return next(
             new ApiError(500, "An error occurred while creating the product")
+        );
+    }
+};
+
+exports.update = async (req, res, next) => {
+    if (!req.body?.name) {
+        return next(new ApiError(400, "Name can not be empty"));
+    }
+    if (!req.body?.type) {
+        return next(new ApiError(400, "Type can not be empty"));
+    }
+    if (!req.body?.price) {
+        return next(new ApiError(400, "Price can not be empty"));
+    }
+    if (!req.body?.image) {
+        return next(new ApiError(400, "Image can not be empty"));
+    }
+    if (!req.body?.quality) {
+        return next(new ApiError(400, "Quality can not be empty"));
+    }
+    if (!req.body?.description) {
+        return next(new ApiError(400, "Description can not be empty"));
+    }
+
+    const productsService = new ProductsService(MongoDB.client);
+
+    try {
+        const document = await productsService.update(req.params.id, req.body);
+        if (!document) {
+            return next(new ApiError(404, "Product not found"));
+        }
+        return res.send(document);
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error retrieving product with id=${req.params.id}`)
         );
     }
 };
