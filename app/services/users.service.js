@@ -14,7 +14,8 @@ class UsersService {
             address: payload.address,
             phone: payload.phone,
             password: payload.password,
-            isAdmin: false,
+            role: payload.role ? payload.role : 'Customer',
+            favoriteProducts: [],
             createdAt: new Date(),
         };
         // Remove undefined fields
@@ -45,7 +46,7 @@ class UsersService {
 
         const result = await this.Users.insertOne({
             ...user,
-            password: hashPassword
+            password: hashPassword,
         });
         return result.value;
     }
@@ -74,6 +75,41 @@ class UsersService {
         });
         return result;
     }
+
+    async addFavorite(userId, productId) {
+        const filter = {
+            _id: ObjectId.isValid(userId) ? new ObjectId(userId) : null,
+        };
+        const result = await this.Users.findOneAndUpdate(
+            filter,
+            {
+                $push:
+                {
+                    "favoriteProducts": new ObjectId(productId),
+                },
+            },
+            { returnDocument: "after" }
+        );
+        return result;
+    }
+
+    async removeFavorite(userId, productId) {
+        const filter = {
+            _id: ObjectId.isValid(userId) ? new ObjectId(userId) : null,
+        };
+        const result = await this.Users.findOneAndUpdate(
+            filter,
+            {
+                $pull:
+                {
+                    "favoriteProducts": new ObjectId(productId),
+                },
+            },
+            { returnDocument: "after" }
+        );
+        return result;
+    }
+
 
 }
 

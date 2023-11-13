@@ -3,6 +3,7 @@ const cors = require('cors');
 const usersRouter = require('./app/routes/users.route');
 const productsRouter = require('./app/routes/products.route');
 const ordersRouter = require('./app/routes/orders.route');
+const reviewsRouter = require('./app/routes/reviews.route');
 const ApiError = require('./app/api-error');
 
 const app = express();
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", usersRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/reviews", reviewsRouter);
 
 
 // handle 404 response

@@ -12,7 +12,7 @@ class ProductsService {
             type: payload.type,
             price: payload.price,
             image: payload.image,
-            quality: payload.quality,
+            quantity: payload.quantity,
             description: payload.description,
             sold: 0,
         };
@@ -40,6 +40,20 @@ class ProductsService {
         });
     }
 
+    async findByType(type) {
+        const cursor = await this.Products.find({
+            type: type,
+        });
+        return await cursor.toArray();
+    }
+
+    async searchByName(productName) {
+        const cursor = await this.Products.find({
+            name: new RegExp(productName, "i"),
+        });
+        return await cursor.toArray();
+    }
+
     async create(payload) {
         const product = this.extractContactData(payload);
         const result = await this.Products.insertOne(product);
@@ -58,7 +72,7 @@ class ProductsService {
                     "name": payload.name, 
                     "type": payload.type,
                     "price": payload.price,
-                    "quality": payload.quality,
+                    "quantity": payload.quantity,
                     "description": payload.description,
                     "image": payload.image,
                 } 

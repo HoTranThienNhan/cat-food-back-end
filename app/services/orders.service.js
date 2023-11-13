@@ -23,12 +23,14 @@ class OrdersService {
         };
         payload.products.map((product) => {
             orders.products.push({
+                _id: new ObjectId(product._id),
                 name: product.name,
                 type: product.type,
                 price: product.price,
                 image: product.image,
                 amount: product.amount,
                 description: product.description,
+                isReviewed: false,
             });
         });
 
@@ -46,20 +48,39 @@ class OrdersService {
         return await cursor.toArray();
     }
 
+    async findByOrderId(orderId) {
+        const cursor = await this.Orders.find({
+            _id: ObjectId.isValid(orderId) ? new ObjectId(orderId) : null,
+        });
+        return cursor.toArray();
+    }
+
+    async findByOrderStatus(status) {
+        const cursor = await this.Orders.find({
+            status: status
+        });
+        return cursor.toArray();
+    }
+
+    async findAll() {
+        const cursor = await this.Orders.find({});
+        return await cursor.toArray();
+    }
+
     async add(payload) {
         const order = this.extractContactData(payload);
 
-        // decrease product quality 
+        // decrease product quantity 
         const promisesProduct = payload.products.map(async (product) => {
             await this.Products.findOneAndUpdate(
                 {
                     _id: ObjectId.isValid(product._id) ? new ObjectId(product._id) : null,
-                    quality: { $gte: product.amount },
+                    quantity: { $gte: product.amount },
                 },
                 {
                     $inc: {
-                        quality: -product.amount,
-                        // sold: +product.amount,
+                        quantity: -product.amount,
+                        sold: +product.amount,
                     }
                 },
                 { new: true }
@@ -75,6 +96,41 @@ class OrdersService {
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
         };
+        const result = await this.Orders.findOneAndUpdate(
+            filter,
+            { $set: { "status": status } },
+            { returnDocument: "after" }
+        );
+        return result;
+    }
+
+    async cancel(order, status) {
+        const orderId = order._id;
+        const products = order.products;
+
+        const filter = {
+            _id: ObjectId.isValid(orderId) ? new ObjectId(orderId) : null,
+        };
+
+        if (filter) {
+            const promisesProduct = products.map(async (product) => {
+                await this.Products.findOneAndUpdate(
+                    {
+                        _id: ObjectId.isValid(product._id) ? new ObjectId(product._id) : null,
+                        quantity: { $gte: product.amount },
+                    },
+                    {
+                        $inc: {
+                            quantity: +product.amount,
+                            sold: -product.amount,
+                        }
+                    },
+                    { new: true }
+                );
+            });
+            const resultsProduct = await Promise.all(promisesProduct);
+        }
+
         const result = await this.Orders.findOneAndUpdate(
             filter,
             { $set: { "status": status } },

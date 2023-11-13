@@ -134,6 +134,47 @@ exports.signin = async (req, res, next) => {
     }
 };
 
+exports.signinAdmin = async (req, res, next) => {
+    try {
+        const usersService = new UsersService(MongoDB.client);
+        const { email, password } = req.body;
+
+        if (!email) {
+            return next(new ApiError(404, "Email is required"));
+        }
+        if (!password) {
+            return next(new ApiError(404, "Password is required"));
+        }
+
+        const document = await usersService.findByEmail(email);
+
+        if (!document) {
+            return next(new ApiError(404, "Email or password incorrect"));
+        } else {
+            // compare password and password in database
+            const comparePassword = bcrypt.compareSync(password, document?.password);
+            if (!comparePassword) {
+                return next(new ApiError(404, "Email or password incorrect"));
+            }
+
+            // check admin
+            if (document?.role === 'Customer') {
+                return next(new ApiError(404, "Account doesn't exist"));
+            }
+        }
+
+        return res.send({
+            status: 'OK',
+            message: 'SIGN IN SUCCESS'
+        });
+
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error signin user`)
+        );
+    }
+};
+
 
 exports.delete = async (req, res, next) => {
     try {
@@ -146,6 +187,36 @@ exports.delete = async (req, res, next) => {
     } catch (error) {
         return next(
             new ApiError(500, `Could not delete user with id=${req.params.id}`)
+        );
+    }
+};
+
+exports.addFavorite = async (req, res, next) => {
+    try {
+        const usersService = new UsersService(MongoDB.client);
+        const document = await usersService.addFavorite(req.params.userId, req.params.productId);
+        if (!document) {
+            new ApiError(400, "Cannot add favorite product" );
+        }
+        return res.send({ message: "Added favorite product successfully" });
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error add favorite product`)
+        );
+    }
+};
+
+exports.removeFavorite = async (req, res, next) => {
+    try {
+        const usersService = new UsersService(MongoDB.client);
+        const document = await usersService.removeFavorite(req.params.userId, req.params.productId);
+        if (!document) {
+            new ApiError(400, "Cannot remove favorite product" );
+        }
+        return res.send({ message: "Removed favorite product successfully" });
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error remove favorite product`)
         );
     }
 };
