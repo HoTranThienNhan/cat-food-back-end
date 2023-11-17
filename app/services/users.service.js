@@ -17,6 +17,7 @@ class UsersService {
             role: payload.role ? payload.role : 'Customer',
             favoriteProducts: [],
             createdAt: new Date(),
+            active: payload.active === false ? false : true,
         };
         // Remove undefined fields
         Object.keys(users).forEach(

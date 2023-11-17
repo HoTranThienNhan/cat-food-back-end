@@ -15,6 +15,8 @@ class ReviewsService {
             userId: payload.userId,
             star: payload.star,
             description: payload.description,
+            images: payload.images ? payload.images : [],
+            createdAt: new Date(),
         };
         // Remove undefined fields
         Object.keys(reviews).forEach(

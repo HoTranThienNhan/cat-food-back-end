@@ -119,7 +119,23 @@ exports.update = async (req, res, next) => {
         return res.send(document);
     } catch (error) {
         return next(
-            new ApiError(500, `Error retrieving product with id=${req.params.id}`)
+            new ApiError(500, `Error updating product with id=${req.params.id}`)
+        );
+    }
+};
+
+exports.delete = async (req, res, next) => {
+    const productsService = new ProductsService(MongoDB.client);
+
+    try {
+        const document = await productsService.delete(req.params.id);
+        if (!document) {
+            return next(new ApiError(404, "Product not found"));
+        }
+        return res.send(document);
+    } catch (error) {
+        return next(
+            new ApiError(500, `Error deleting product with id=${req.params.id}`)
         );
     }
 };

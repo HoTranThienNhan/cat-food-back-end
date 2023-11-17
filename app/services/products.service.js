@@ -15,6 +15,7 @@ class ProductsService {
             quantity: payload.quantity,
             description: payload.description,
             sold: 0,
+            createdAt: new Date(),
         };
         // Remove undefined fields
         Object.keys(products).forEach(
@@ -67,19 +68,29 @@ class ProductsService {
         };
         const result = await this.Products.findOneAndUpdate(
             filter,
-            { $set: 
-                { 
-                    "name": payload.name, 
+            {
+                $set:
+                {
+                    "name": payload.name,
                     "type": payload.type,
                     "price": payload.price,
                     "quantity": payload.quantity,
                     "description": payload.description,
                     "image": payload.image,
-                } 
+                }
             },
             { returnDocument: "after" }
         );
         return result;
+    }
+
+    async delete(id) {
+        const filter = {
+            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+        };
+        return await this.Products.findOneAndDelete(
+            filter
+        );
     }
 
 }

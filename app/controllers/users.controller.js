@@ -8,7 +8,7 @@ exports.findOne = async (req, res, next) => {
         const usersService = new UsersService(MongoDB.client);
         const document = await usersService.findById(req.params.id);
         if (!document) {
-            return next(new ApiError(404, "Users not found"));
+            return next(new ApiError(404, "User not found"));
         }
         return res.send(document);
     } catch (error) {
@@ -23,7 +23,7 @@ exports.findOneByEmail = async (req, res, next) => {
         const usersService = new UsersService(MongoDB.client);
         const document = await usersService.findByEmail(req.params.id);
         if (!document) {
-            return next(new ApiError(404, "Users not found"));
+            return next(new ApiError(404, "User not found"));
         }
         return res.send(document);
     } catch (error) {
@@ -115,6 +115,9 @@ exports.signin = async (req, res, next) => {
         if (!document) {
             return next(new ApiError(404, "Email or password incorrect"));
         } else {
+            if (document.active === false) {
+                return next(new ApiError(404, "User is unactive"));
+            }
             // compare password and password in database
             const comparePassword = bcrypt.compareSync(password, document?.password);
             if (!comparePassword) {
@@ -151,6 +154,9 @@ exports.signinAdmin = async (req, res, next) => {
         if (!document) {
             return next(new ApiError(404, "Email or password incorrect"));
         } else {
+            if (document.active === false) {
+                return next(new ApiError(404, "User is unactive"));
+            }
             // compare password and password in database
             const comparePassword = bcrypt.compareSync(password, document?.password);
             if (!comparePassword) {
