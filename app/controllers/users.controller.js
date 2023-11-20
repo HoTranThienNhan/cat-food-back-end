@@ -84,6 +84,18 @@ exports.update = async (req, res, next) => {
     if (Object.keys(req.body).length === 0) {
         return next(new ApiError(404, "Data to update cannot be empty"));
     }
+    if (!req.body.name) {
+        return next(new ApiError(404, "Name cannot be empty"));
+    }
+    if (!req.body.email) {
+        return next(new ApiError(404, "Email cannot be empty"));
+    }
+    if (!req.body.phone) {
+        return next(new ApiError(404, "Phone cannot be empty"));
+    }
+    if (!req.body.address) {
+        return next(new ApiError(404, "Address cannot be empty"));
+    }
     try {
         const usersService = new UsersService(MongoDB.client);
         const document = await usersService.update(req.params.id, req.body);
